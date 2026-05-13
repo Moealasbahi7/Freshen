@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Freshen — Détails du plan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --g:#5a8a1f; --gl:#7ab52a; --gd:#3b6011;
+      --cream:#f9f6ef; --dark:#1a1f0e; --white:#ffffff;
+      --gray:#888888; --border:rgba(0,0,0,0.07);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family:'DM Sans',sans-serif; background:var(--cream); color:var(--dark); overflow-x:hidden; }
+    nav { display:flex; align-items:center; justify-content:space-between; padding:1.2rem 3rem; background:rgba(249,246,239,0.96); position:sticky; top:0; z-index:200; backdrop-filter:blur(8px); border-bottom:0.5px solid rgba(90,138,31,0.15); }
+    .logo { font-family:'Playfair Display',serif; font-size:1.6rem; color:var(--g); font-weight:700; display:flex; align-items:center; gap:8px; text-decoration:none; }
+    .logo-dot { width:10px; height:10px; background:var(--gl); border-radius:50%; display:inline-block; }
+    .nav-back { background:transparent; color:var(--dark); padding:0.6rem 1.4rem; border-radius:100px; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:500; cursor:pointer; transition:all 0.2s; text-decoration:none; display:inline-flex; align-items:center; gap:6px; border:none; }
+    .nav-back:hover { color:var(--g); }
+    .breadcrumb { padding:1rem 3rem; background:#fff; font-size:0.85rem; color:var(--gray); border-bottom:0.5px solid var(--border); }
+    .breadcrumb a { color:var(--g); text-decoration:none; transition:opacity 0.2s; cursor:pointer; }
+    .breadcrumb a:hover { opacity:0.7; }
+    .plan-hero { padding:4rem 3rem; text-align:center; background:linear-gradient(135deg, rgba(90,138,31,0.08) 0%, transparent 100%); border-bottom:0.5px solid var(--border); }
+    .plan-title { font-family:'Playfair Display',serif; font-size:2.8rem; font-weight:700; margin-bottom:1rem; }
+    .plan-badge-featured { display:inline-block; background:var(--g); color:#fff; padding:0.5rem 1rem; border-radius:100px; font-size:0.75rem; font-weight:600; margin-bottom:1.5rem; letter-spacing:0.04em; }
+    .plan-price-large { font-family:'Playfair Display',serif; font-size:3.2rem; font-weight:700; color:var(--g); margin-bottom:0.3rem; }
+    .plan-period-large { font-size:1rem; opacity:0.6; margin-bottom:2rem; }
+    .plan-description { font-size:1rem; opacity:0.65; max-width:600px; margin:0 auto 2rem; line-height:1.7; }
+    .hero-buttons { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+    .btn-primary { background:var(--g); color:#fff; border:none; padding:0.85rem 2rem; border-radius:100px; font-family:'DM Sans',sans-serif; font-size:0.95rem; font-weight:500; cursor:pointer; transition:transform 0.2s, background 0.2s; text-decoration:none; display:inline-block; }
+    .btn-primary:hover { background:var(--gd); transform:translateY(-2px); }
+    .btn-secondary { background:transparent; color:var(--g); border:1.5px solid var(--g); padding:0.85rem 2rem; border-radius:100px; font-family:'DM Sans',sans-serif; font-size:0.95rem; font-weight:500; cursor:pointer; transition:background 0.2s; text-decoration:none; display:inline-block; }
+    .btn-secondary:hover { background:rgba(90,138,31,0.07); }
+    .content-section { padding:4rem 3rem; background:#fff; border-bottom:0.5px solid var(--border); }
+    .section-title { font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:700; margin-bottom:2rem; }
+    .features-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:2rem; margin-bottom:2rem; }
+    .feature-item { display:flex; gap:1.2rem; }
+    .feature-icon { width:48px; height:48px; border-radius:14px; background:rgba(90,138,31,0.1); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; }
+    .feature-content h3 { font-size:1.05rem; font-weight:600; margin-bottom:0.4rem; }
+    .feature-content p { font-size:0.9rem; opacity:0.65; line-height:1.6; }
+    .checklist { display:grid; grid-template-columns:repeat(2,1fr); gap:1.2rem; }
+    .check-item { display:flex; gap:0.8rem; align-items:flex-start; }
+    .check-icon { color:var(--g); font-size:1.2rem; margin-top:2px; flex-shrink:0; }
+    .check-label { font-size:0.95rem; line-height:1.5; }
+    .comparison-table { width:100%; border-collapse:collapse; margin-top:1.5rem; }
+    .comparison-table th { background:var(--cream); padding:1rem; text-align:left; font-weight:600; border-bottom:1px solid var(--border); font-size:0.9rem; }
+    .comparison-table td { padding:1rem; border-bottom:0.5px solid var(--border); font-size:0.9rem; }
+    .comparison-table tr:last-child td { border-bottom:none; }
+    .check-mark { color:var(--g); font-weight:600; }
+    .x-mark { color:var(--gray); opacity:0.4; }
+    .faq-item { margin-bottom:1.2rem; border:0.5px solid var(--border); border-radius:14px; overflow:hidden; }
+    .faq-question { padding:1.2rem; background:var(--cream); cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-weight:500; transition:background 0.2s; user-select:none; }
+    .faq-question:hover { background:rgba(90,138,31,0.05); }
+    .faq-toggle { font-size:1.2rem; transition:transform 0.3s; }
+    .faq-answer { padding:0; max-height:0; overflow:hidden; transition:max-height 0.3s ease, padding 0.3s ease; background:#fff; }
+    .faq-answer.open { padding:1.2rem; max-height:500px; }
+    .faq-answer p { font-size:0.9rem; line-height:1.7; opacity:0.65; }
+    .cta-section { padding:4rem 3rem; background:linear-gradient(135deg, rgba(90,138,31,0.08) 0%, transparent 100%); text-align:center; border-bottom:0.5px solid var(--border); }
+    .cta-section h2 { font-family:'Playfair Display',serif; font-size:2rem; margin-bottom:1rem; }
+    .cta-section p { font-size:1rem; opacity:0.65; max-width:500px; margin:0 auto 2rem; line-height:1.7; }
+    footer { padding:3rem; background:#fff; border-top:0.5px solid var(--border); text-align:center; }
+    .footer-copy { font-size:0.8rem; color:#aaa; }
+    @media (max-width:1024px) {
+      .features-grid, .checklist, .comparison-table { grid-template-columns:1fr; }
+      .plan-hero, .content-section, .cta-section { padding:3rem 2rem; }
+    }
+    @media (max-width:768px) {
+      nav { padding:1rem 1.5rem; }
+      .plan-hero { padding:2.5rem 1.5rem; }
+      .plan-title { font-size:2rem; }
+      .plan-price-large { font-size:2.5rem; }
+      .content-section, .cta-section { padding:2.5rem 1.5rem; }
+      .section-title { font-size:1.4rem; }
+      .features-grid, .checklist { grid-template-columns:1fr; }
+      .hero-buttons { flex-direction:column; }
+      .hero-buttons button, .hero-buttons a { width:100%; }
+      footer { padding:2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo"><span class="logo-dot"></span>Freshen</a>
+  <a href="index.html" class="nav-back">← Retour à la tarification</a>
+</nav>
+
+<div class="breadcrumb">
+  <a href="index.html">Tarification</a> / <span id="breadcrumbPlan">Plan</span>
+</div>
+
+<section class="plan-hero" id="planHero">
+  <div id="badgeContainer"></div>
+  <h1 class="plan-title" id="planTitle">Premium</h1>
+  <p class="plan-description" id="planDescription">Description du plan ici.</p>
+  <div class="plan-price-large" id="planPrice">€3,99</div>
+  <div class="plan-period-large" id="planPeriod">par mois</div>
+  <div class="hero-buttons">
+    <a class="btn-primary" id="ctaTop" href="signup.html">Commencer mon essai gratuit →</a>
+    <a class="btn-secondary" href="index.html">Voir tous les plans</a>
+  </div>
+</section>
+
+<section class="content-section">
+  <h2 class="section-title">Ce qui est inclus</h2>
+  <div class="features-grid" id="featuresGrid"></div>
+</section>
+
+<section class="content-section">
+  <h2 class="section-title">Liste complète des fonctionnalités</h2>
+  <div class="checklist" id="featureChecklist"></div>
+</section>
+
+<section class="content-section">
+  <h2 class="section-title">Comparaison des plans</h2>
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>Fonctionnalité</th>
+        <th>Gratuit</th>
+        <th id="comparisonPlanName">Premium</th>
+        <th>Famille</th>
+      </tr>
+    </thead>
+    <tbody id="comparisonBody"></tbody>
+  </table>
+</section>
+
+<section class="content-section">
+  <h2 class="section-title">Questions fréquemment posées</h2>
+  <div id="faqContainer"></div>
+</section>
+
+<section class="cta-section">
+  <h2>Prêt à commencer?</h2>
+  <p>Rejoignez des milliers de personnes qui mangent mieux chaque jour avec Freshen.</p>
+  <a class="btn-primary" id="ctaBottom" href="signup.html">Commencer mon essai gratuit →</a>
+</section>
+
+<footer>
+  <p class="footer-copy">© 2026 Freshen. Tous droits réservés. • <a href="#" style="color:#aaa;text-decoration:none;">Politique de confidentialité</a> • <a href="#" style="color:#aaa;text-decoration:none;">Conditions d'utilisation</a></p>
+</footer>
+
+<script>
+  const planData = {
+    free: {
+      name: 'Gratuit', price: '€0', period: 'pour toujours', badge: null,
+      description: 'Parfait pour explorer les bases de l\'alimentation saine. Commencez votre voyage vers une meilleure nutrition avec les outils essentiels.',
+      features: [
+        { icon: '📚', title: '5 recettes par semaine', desc: 'Recettes saines curées livrées chaque semaine' },
+        { icon: '📋', title: 'Modèles de repas simples', desc: 'Structure de repas simple pour bien commencer' },
+        { icon: '📊', title: 'Info nutrition', desc: 'Voir calories et macros par recette' }
+      ],
+      allFeatures: ['5 recettes par semaine', 'Modèles de repas basiques', 'Information nutritionnelle par recette', 'Accès communautaire', 'Filtres de recettes basiques'],
+      faqs: [
+        { q: 'Puis-je passer à Premium plus tard?', a: 'Oui! Vous pouvez upgrader à tout moment. Vos recettes et progrès seront transférés en toute transparence.' },
+        { q: 'Une carte de crédit est-elle requise?', a: 'Non, pas besoin de carte de crédit. Vous pouvez explorer Freshen complètement gratuitement sans frais cachés.' },
+        { q: 'Combien de temps puis-je utiliser le plan gratuit?', a: 'Aussi longtemps que vous le souhaitez! Le plan gratuit n\'expire jamais, bien que les fonctionnalités soient limitées.' }
+      ]
+    },
+    premium: {
+      name: 'Premium', price: '€3,99', period: 'par mois · ou €28/an (économisez 27%)', badge: 'Le plus populaire',
+      description: 'Pour ceux qui sont sérieux au sujet de manger mieux chaque jour. Recettes illimitées, plans personnalisés et outils de shopping intelligents.',
+      features: [
+        { icon: '🌟', title: 'Recettes illimitées', desc: 'Accédez à toute notre collection de recettes saines' },
+        { icon: '📅', title: 'Plans hebdomadaires personnalisés', desc: 'Plans générés par IA adaptés à vos objectifs' },
+        { icon: '🛒', title: 'Listes de courses intelligentes', desc: 'Listes organisées et triées par section de magasin' },
+        { icon: '📊', title: 'Suivi des objectifs et nutrition', desc: 'Surveillez les progrès vers vos objectifs de santé' }
+      ],
+      allFeatures: ['Recettes illimitées', 'Plans de repas hebdomadaires personnalisés', 'Listes de courses intelligentes auto-organisées', 'Suivi nutritionnel détaillé', 'Aperçus de progrès objectifs', 'Personnalisation de recettes', 'Filtres alimentaires avancés', 'Support par e-mail'],
+      faqs: [
+        { q: 'Puis-je annuler à tout moment?', a: 'Absolument. Annulez votre abonnement à tout moment sans pénalités. Aucun engagement à long terme requis.' },
+        { q: 'Y a-t-il un essai gratuit?', a: 'Oui! Obtenez un essai gratuit de 7 jours pour explorer toutes les fonctionnalités Premium. Pas de carte de crédit requise pour commencer.' },
+        { q: 'Et si je n\'aime pas?', a: 'Nous offrons une garantie de remboursement de 30 jours. Si vous n\'êtes pas satisfait, nous vous remboursons complètement.' },
+        { q: 'Puis-je passer au plan Famille plus tard?', a: 'Oui! N\'importe quand. Vos recettes, préférences et progrès seront transférés automatiquement.' }
+      ]
+    },
+    family: {
+      name: 'Famille', price: '€7,99', period: 'par mois', badge: null,
+      description: 'Un plan, plusieurs profils — pour toute la famille. Parfait pour les familles qui veulent manger mieux ensemble.',
+      features: [
+        { icon: '👨‍👩‍👧‍👦', title: 'Jusqu\'à 5 profils', desc: 'Créez des préférences séparées pour chaque membre' },
+        { icon: '🛒', title: 'Listes d\'épicerie combinées', desc: 'Liste consolidée avec tous les repas familiaux' },
+        { icon: '👶', title: 'Recettes adaptées aux enfants', desc: 'Repas approuvés par les enfants et nutritionnistes' },
+        { icon: '📊', title: 'Suivi individuel', desc: 'Surveillez les objectifs de chaque membre séparément' }
+      ],
+      allFeatures: ['Jusqu\'à 5 profils individuels', 'Recettes illimitées pour tous', 'Plans personnalisés par profil', 'Listes combinées et individuelles', 'Section recettes adaptées aux enfants', 'Aperçus nutritionnels familiaux', 'Gestion allergies et régimes', 'Support email prioritaire'],
+      faqs: [
+        { q: 'Combien de personnes peuvent utiliser un plan Famille?', a: 'Jusqu\'à 5 profils. Chaque personne obtient ses propres plans personnalisés, recettes et suivi.' },
+        { q: 'Les enfants peuvent-ils avoir leurs propres profils?', a: 'Oui! Les enfants peuvent avoir leurs propres profils avec des recettes adaptées aux enfants et des objectifs nutritionnels appropriés.' },
+        { q: 'Partageons-nous une liste d\'épicerie?', a: 'Vous pouvez combiner tous les repas en une seule liste, ou voir des listes individuelles. Vous choisissez!' },
+        { q: 'Est-ce moins cher que plusieurs abonnements Premium?', a: 'Oui! Le plan Famille à €7,99/mois pour jusqu\'à 5 personnes vs €3,99/mois par personne pour Premium.' }
+      ]
+    }
+  };
+
+  const COMPARISON = [
+    { feature: 'Recettes', free: '5/semaine', premium: 'Illimitées', family: 'Illimitées' },
+    { feature: 'Planification des repas', free: '✗', premium: '✓', family: '✓' },
+    { feature: 'Listes de courses intelligentes', free: '✗', premium: '✓', family: '✓' },
+    { feature: 'Suivi des objectifs', free: '✗', premium: '✓', family: '✓' },
+    { feature: 'Profils familiaux', free: '✗', premium: '✗', family: '✓' },
+    { feature: 'Support', free: 'Communauté', premium: 'E-mail', family: 'Prioritaire' }
+  ];
+
+  function getPlanFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('plan') || 'premium';
+  }
+
+  function loadPlan() {
+    const planType = getPlanFromURL();
+    const plan = planData[planType];
+    if (!plan) { window.location.href = 'index.html'; return; }
+
+    document.getElementById('breadcrumbPlan').textContent = plan.name;
+    const badgeContainer = document.getElementById('badgeContainer');
+    if (plan.badge) badgeContainer.innerHTML = `<div class="plan-badge-featured">${plan.badge}</div>`;
+    document.getElementById('planTitle').textContent = plan.name;
+    document.getElementById('planDescription').textContent = plan.description;
+    document.getElementById('planPrice').textContent = plan.price;
+    document.getElementById('planPeriod').textContent = plan.period;
+    document.getElementById('comparisonPlanName').textContent = plan.name;
+
+    document.getElementById('ctaTop').href    = `signup.html?plan=${planType}`;
+    document.getElementById('ctaBottom').href = `signup.html?plan=${planType}`;
+
+    document.getElementById('featuresGrid').innerHTML = plan.features.map(f => `
+      <div class="feature-item">
+        <div class="feature-icon">${f.icon}</div>
+        <div class="feature-content"><h3>${f.title}</h3><p>${f.desc}</p></div>
+      </div>`).join('');
+
+    document.getElementById('featureChecklist').innerHTML = plan.allFeatures.map(f => `
+      <div class="check-item">
+        <div class="check-icon">✓</div>
+        <div class="check-label">${f}</div>
+      </div>`).join('');
+
+    document.getElementById('comparisonBody').innerHTML = COMPARISON.map(row => {
+      const cell = (v) => v === '✓' ? '<span class="check-mark">✓</span>' : (v === '✗' ? '<span class="x-mark">–</span>' : v);
+      return `<tr>
+        <td><strong>${row.feature}</strong></td>
+        <td>${cell(row.free)}</td>
+        <td>${cell(row.premium)}</td>
+        <td>${cell(row.family)}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('faqContainer').innerHTML = plan.faqs.map((faq, idx) => `
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFAQ(${idx})">
+          <span>${faq.q}</span>
+          <span class="faq-toggle">+</span>
+        </div>
+        <div class="faq-answer" id="faq-${idx}"><p>${faq.a}</p></div>
+      </div>`).join('');
+  }
+
+  function toggleFAQ(idx) {
+    const answer = document.getElementById(`faq-${idx}`);
+    const toggle = answer.previousElementSibling.querySelector('.faq-toggle');
+    answer.classList.toggle('open');
+    toggle.textContent = answer.classList.contains('open') ? '−' : '+';
+  }
+
+  window.addEventListener('load', loadPlan);
+</script>
+</body>
+</html>

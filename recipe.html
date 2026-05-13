@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Freshen — Recette</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root { --g:#5a8a1f; --gl:#7ab52a; --gd:#3b6011; --cream:#f9f6ef; --dark:#1a1f0e; --border:rgba(0,0,0,0.07); --warn:#e07b00; }
+    body { font-family:'DM Sans',sans-serif; background:var(--cream); color:var(--dark); min-height:100vh; }
+
+    nav { display:flex; align-items:center; justify-content:space-between; padding:1.2rem 3rem; background:rgba(249,246,239,0.96); position:sticky; top:0; z-index:200; backdrop-filter:blur(8px); border-bottom:0.5px solid rgba(90,138,31,0.15); }
+    .logo { font-family:'Playfair Display',serif; font-size:1.6rem; color:var(--g); font-weight:700; display:flex; align-items:center; gap:8px; text-decoration:none; }
+    .logo-dot { width:10px; height:10px; background:var(--gl); border-radius:50%; }
+    .back-btn { color:var(--dark); text-decoration:none; font-size:0.88rem; opacity:0.6; transition:opacity 0.2s; }
+    .back-btn:hover { opacity:1; color:var(--g); }
+
+    /* Hero */
+    .hero { background:linear-gradient(135deg,rgba(90,138,31,0.07),rgba(122,181,42,0.03)); border-bottom:0.5px solid rgba(90,138,31,0.1); padding:2.5rem 3rem; }
+    .hero-inner { max-width:780px; margin:0 auto; display:grid; grid-template-columns:auto 1fr; gap:2rem; align-items:center; }
+    .hero-emoji { font-size:5rem; line-height:1; }
+    .hero-title { font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:700; margin-bottom:0.5rem; }
+    .hero-desc { font-size:0.92rem; opacity:0.65; line-height:1.7; margin-bottom:1rem; }
+    .hero-tags { display:flex; gap:0.5rem; flex-wrap:wrap; }
+    .tag { background:#fff; border:0.5px solid var(--border); padding:0.3rem 0.8rem; border-radius:100px; font-size:0.75rem; font-weight:500; }
+    .tag.green { background:rgba(90,138,31,0.1); border-color:rgba(90,138,31,0.2); color:var(--g); }
+
+    .page { max-width:780px; margin:0 auto; padding:2rem 3rem 4rem; }
+
+    /* Nutrition cards */
+    .nutri-row { display:grid; grid-template-columns:repeat(4,1fr); gap:0.7rem; margin-bottom:2rem; }
+    .nutri-box { background:#fff; border-radius:14px; padding:0.9rem; border:0.5px solid var(--border); text-align:center; }
+    .nutri-val { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--g); }
+    .nutri-label { font-size:0.68rem; opacity:0.5; text-transform:uppercase; letter-spacing:0.05em; margin-top:0.2rem; }
+
+    /* Servings */
+    .servings-bar { display:flex; align-items:center; justify-content:space-between; background:#fff; border-radius:16px; padding:1rem 1.4rem; border:0.5px solid var(--border); margin-bottom:2rem; }
+    .servings-label { font-size:0.9rem; font-weight:500; }
+    .servings-hint { font-size:0.78rem; opacity:0.5; }
+    .srv-ctrl { display:flex; align-items:center; gap:0.8rem; }
+    .srv-btn { width:36px; height:36px; border-radius:50%; border:none; background:var(--g); color:#fff; font-size:1.3rem; font-weight:300; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s, transform 0.1s; line-height:1; user-select:none; }
+    .srv-btn:hover { background:var(--gd); transform:scale(1.08); }
+    .srv-btn:active { transform:scale(0.95); }
+    .srv-num { font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; min-width:30px; text-align:center; }
+
+    /* Ingredients */
+    .block-title { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; margin-bottom:0.4rem; }
+    .block-hint { font-size:0.82rem; opacity:0.5; margin-bottom:1rem; }
+    .ing-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; margin-bottom:2rem; }
+    .ing-item { background:#fff; border-radius:12px; padding:0.8rem 1rem; border:0.5px solid var(--border); display:flex; align-items:center; gap:0.7rem; cursor:pointer; transition:all 0.18s; }
+    .ing-item:hover { border-color:rgba(90,138,31,0.3); background:rgba(90,138,31,0.03); }
+    .ing-item.done { opacity:0.45; text-decoration:line-through; background:rgba(90,138,31,0.04); }
+    .ing-emoji { font-size:1.4rem; flex-shrink:0; }
+    .ing-text { min-width:0; }
+    .ing-name { font-size:0.85rem; font-weight:500; }
+    .ing-qty { font-size:0.78rem; color:var(--g); font-weight:600; margin-top:0.1rem; }
+
+    /* Steps */
+    .steps-list { display:grid; gap:0.8rem; margin-bottom:2rem; }
+    .step-item { display:grid; grid-template-columns:40px 1fr; gap:1rem; align-items:start; cursor:pointer; }
+    .step-num { width:40px; height:40px; border-radius:50%; background:var(--g); color:#fff; font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background 0.2s; }
+    .step-item.done .step-num { background:rgba(90,138,31,0.2); color:var(--g); }
+    .step-body { background:#fff; border-radius:14px; padding:1rem 1.2rem; border:0.5px solid var(--border); transition:opacity 0.2s; }
+    .step-item.done .step-body { opacity:0.5; }
+    .step-title { font-size:0.85rem; font-weight:600; color:var(--g); margin-bottom:0.35rem; }
+    .step-text { font-size:0.88rem; line-height:1.65; opacity:0.85; }
+    .step-time { font-size:0.74rem; color:var(--warn); font-weight:500; margin-top:0.5rem; }
+
+    /* Tips */
+    .tips-box { background:rgba(90,138,31,0.06); border:0.5px solid rgba(90,138,31,0.15); border-radius:14px; padding:1.2rem 1.4rem; margin-bottom:2rem; }
+    .tips-title { font-size:0.78rem; font-weight:600; color:var(--g); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.7rem; }
+    .tip-item { font-size:0.84rem; opacity:0.8; line-height:1.6; display:flex; gap:0.6rem; margin-bottom:0.4rem; }
+    .tip-item:last-child { margin-bottom:0; }
+
+    /* Add button */
+    .add-btn-wrap { position:sticky; bottom:1.5rem; }
+    .add-btn { width:100%; background:var(--g); color:#fff; border:none; padding:1rem 2rem; border-radius:100px; font-family:'DM Sans',sans-serif; font-size:0.95rem; font-weight:500; cursor:pointer; transition:background 0.2s,transform 0.15s; box-shadow:0 8px 24px rgba(90,138,31,0.35); }
+    .add-btn:hover { background:var(--gd); transform:translateY(-2px); }
+    .add-btn:active { transform:translateY(0); }
+
+    .toast { position:fixed; bottom:2rem; right:2rem; background:var(--dark); color:#fff; padding:0.9rem 1.5rem; border-radius:12px; font-size:0.88rem; z-index:9999; opacity:0; transform:translateY(12px); transition:all 0.3s; pointer-events:none; }
+    .toast.show { opacity:1; transform:translateY(0); }
+
+    @media (max-width:768px) {
+      nav { padding:1rem 1.5rem; }
+      .hero { padding:1.5rem; }
+      .hero-inner { grid-template-columns:1fr; gap:0.8rem; }
+      .hero-emoji { font-size:3rem; }
+      .page { padding:1.5rem; }
+      .nutri-row { grid-template-columns:repeat(2,1fr); }
+      .ing-grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo"><span class="logo-dot"></span>Freshen</a>
+  <a href="journal.html" class="back-btn">← Retour au journal</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-emoji" id="heroEmoji">🥗</div>
+    <div>
+      <h1 class="hero-title" id="heroTitle">Recette</h1>
+      <p class="hero-desc" id="heroDesc"></p>
+      <div class="hero-tags" id="heroTags"></div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- Nutrition per portion -->
+  <div class="nutri-row" id="nutriRow"></div>
+
+  <!-- Servings adjuster -->
+  <div class="servings-bar">
+    <div>
+      <div class="servings-label">Nombre de portions</div>
+      <div class="servings-hint">Les quantités s'ajustent automatiquement</div>
+    </div>
+    <div class="srv-ctrl">
+      <button class="srv-btn" id="btnMinus">−</button>
+      <div class="srv-num" id="srvNum">2</div>
+      <button class="srv-btn" id="btnPlus">+</button>
+    </div>
+  </div>
+
+  <!-- Ingredients -->
+  <div class="block-title">Ce qu'il vous faut</div>
+  <div class="block-hint">Touchez un ingrédient pour le cocher quand vous l'avez préparé</div>
+  <div class="ing-grid" id="ingGrid"></div>
+
+  <!-- Steps -->
+  <div class="block-title">Comment préparer</div>
+  <div class="block-hint">Suivez les étapes dans l'ordre — touchez une étape pour la marquer comme faite</div>
+  <div class="steps-list" id="stepsList"></div>
+
+  <!-- Tips -->
+  <div class="tips-box" id="tipsBox"></div>
+
+  <!-- Add to journal -->
+  <div class="add-btn-wrap">
+    <button class="add-btn" id="addBtn">📓 Ajouter au journal</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
+  const sb = createClient(
+    'https://nuzlradcatdudvkcacpp.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51emxyYWRjYXRkdWR2a2NhY3BwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4OTc2MjYsImV4cCI6MjA5MzQ3MzYyNn0.CeLsQh_ZENqMM5v84jU2_iz02PDIMHKLvrJ-VPegARk'
+  );
+
+  // ── ALL RECIPES ───────────────────────────────────────────────
+  const RECIPES = {
+    "Flocons d'avoine": {
+      emoji:'🌾', desc:'Un porridge chaud et rassasiant pour démarrer la journée avec une énergie durable. Riche en fibres, il libère son énergie progressivement.',
+      tags:['⏱ 10 min','NOVA 1','Sans sucre ajouté'], color:'green',
+      nutri:{kcal:250, protein:8, sugar:6, fiber:4},
+      base:2,
+      ingredients:[
+        {emoji:'🌾', name:"Flocons d'avoine", qty:80, unit:'g'},
+        {emoji:'🥛', name:'Lait ou lait végétal', qty:300, unit:'ml'},
+        {emoji:'🍌', name:'Banane', qty:1, unit:''},
+        {emoji:'🍯', name:'Miel', qty:1, unit:'c.à.s'},
+        {emoji:'🫐', name:'Myrtilles', qty:50, unit:'g'},
+        {emoji:'🌰', name:'Amandes effilées', qty:15, unit:'g'},
+      ],
+      steps:[
+        {title:'Chauffer le lait', text:'Versez le lait dans une casserole, chauffez à feu moyen sans faire bouillir.', time:'2 min'},
+        {title:'Ajouter les flocons', text:'Ajoutez les flocons et remuez régulièrement à feu doux jusqu\'à texture crémeuse.', time:'5 min'},
+        {title:'Préparer les toppings', text:'Coupez la banane en rondelles. Rincez les myrtilles.', time:'2 min'},
+        {title:'Assembler et servir', text:'Versez dans un bol. Ajoutez la banane, les myrtilles, les amandes et un filet de miel.', time:'1 min'},
+      ],
+      tips:['Préparez la veille : flocons + lait + fruits au frigo = overnight oats', 'Ajoutez graines de chia ou sirop d\'érable pour varier', 'Pour plus de protéines : une cuillère de fromage blanc par-dessus']
+    },
+    "Œufs": {
+      emoji:'🥚', desc:'Des œufs brouillés crémeux — riches en protéines et acides aminés essentiels. La technique est simple mais le résultat change tout.',
+      tags:['⏱ 8 min','NOVA 1','Riche en protéines'], color:'green',
+      nutri:{kcal:180, protein:14, sugar:0.5, fiber:0},
+      base:2,
+      ingredients:[
+        {emoji:'🥚', name:'Œufs', qty:4, unit:''},
+        {emoji:'🧈', name:'Beurre', qty:15, unit:'g'},
+        {emoji:'🧂', name:'Sel & poivre', qty:1, unit:'pincée'},
+        {emoji:'🌿', name:'Ciboulette fraîche', qty:5, unit:'g'},
+        {emoji:'🍞', name:'Pain complet', qty:2, unit:'tranches'},
+      ],
+      steps:[
+        {title:'Battre les œufs', text:'Cassez les œufs dans un bol, battez-les à la fourchette. Salez et poivrez.', time:'1 min'},
+        {title:'Beurre à feu doux', text:'Faites fondre le beurre à feu très doux dans une poêle antiadhésive.', time:'1 min'},
+        {title:'Cuire doucement', text:'Versez les œufs. Remuez constamment avec une spatule. Retirez du feu quand encore légèrement liquides — ils finissent de cuire hors feu.', time:'4 min'},
+        {title:'Servir', text:'Dressez sur le pain toasté. Parsemez de ciboulette ciselée.', time:'1 min'},
+      ],
+      tips:['Feu doux = la clé des œufs brouillés crémeux', 'Retirez la poêle 30 secondes avant cuisson parfaite', 'Ajoutez fromage râpé ou saumon fumé pour varier']
+    },
+    "Banane": {
+      emoji:'🍌', desc:'Un smoothie banane-beurre de cacahuète ultra-énergisant, parfait avant ou après l\'effort. Prêt en 5 minutes.',
+      tags:['⏱ 5 min','NOVA 1','Sans cuisson'], color:'green',
+      nutri:{kcal:320, protein:9, sugar:18, fiber:3},
+      base:2,
+      ingredients:[
+        {emoji:'🍌', name:'Bananes mûres', qty:2, unit:''},
+        {emoji:'🥜', name:'Beurre de cacahuète', qty:30, unit:'g'},
+        {emoji:'🥛', name:"Lait d'amande", qty:250, unit:'ml'},
+        {emoji:'🌾', name:"Flocons d'avoine", qty:30, unit:'g'},
+        {emoji:'🍯', name:'Miel', qty:1, unit:'c.à.c'},
+        {emoji:'🧊', name:'Glaçons', qty:4, unit:''},
+      ],
+      steps:[
+        {title:'Préparer', text:'Pelez les bananes. Les bananes très mûres (taches brunes) donnent plus de sucre naturel.', time:'1 min'},
+        {title:'Mixer', text:'Mettez tous les ingrédients dans un blender. Mixez 45 secondes jusqu\'à texture lisse.', time:'2 min'},
+        {title:'Ajuster', text:'Goûtez et ajustez : plus de lait pour fluidifier, plus de banane pour sucrer.', time:'1 min'},
+        {title:'Servir', text:'Versez dans deux grands verres. Dégustez immédiatement.', time:'1 min'},
+      ],
+      tips:['Congelez les bananes très mûres en morceaux pour des smoothies glacés', 'Ajoutez une cuillère de protéines en poudre après l\'effort', 'Substituez le beurre de cacahuète par du tahini pour une version sans noix']
+    },
+    "Saumon": {
+      emoji:'🐟', desc:'Un filet de saumon au four avec citron et herbes — simple, rapide, et riche en oméga-3 anti-fatigue.',
+      tags:['⏱ 20 min','NOVA 1','Riche en Oméga-3'], color:'green',
+      nutri:{kcal:290, protein:28, sugar:0, fiber:1},
+      base:2,
+      ingredients:[
+        {emoji:'🐟', name:'Filets de saumon', qty:300, unit:'g'},
+        {emoji:'🍋', name:'Citron', qty:1, unit:''},
+        {emoji:'🫒', name:"Huile d'olive", qty:2, unit:'c.à.s'},
+        {emoji:'🧄', name:'Ail', qty:2, unit:'gousses'},
+        {emoji:'🌿', name:'Aneth frais', qty:10, unit:'g'},
+        {emoji:'🧂', name:'Sel & poivre', qty:1, unit:'pincée'},
+      ],
+      steps:[
+        {title:'Préchauffer le four', text:'Préchauffez à 200°C. Préparez une plaque avec papier sulfurisé.', time:'10 min'},
+        {title:'Marinade', text:'Mélangez huile d\'olive, jus de citron, ail émincé, sel et poivre.', time:'2 min'},
+        {title:'Assaisonner et enfourner', text:'Badigeonnez les filets de marinade. Ajoutez des rondelles de citron. Enfournez 12-15 min.', time:'15 min'},
+        {title:'Servir', text:'Parsemez d\'aneth frais. Servez avec des légumes vapeur.', time:'2 min'},
+      ],
+      tips:['Le saumon doit rester légèrement rosé au centre — ne surcuisez pas', 'À 150°C pendant 20 min = résultat encore plus fondant', 'Marinade express : sauce soja + miel + ail en 30 secondes']
+    },
+    "Brocolis": {
+      emoji:'🥦', desc:'Un gratin de brocolis léger et savoureux, riche en vitamines B6 pour soutenir votre métabolisme.',
+      tags:['⏱ 25 min','NOVA 1','Riche en vitamines'], color:'green',
+      nutri:{kcal:180, protein:12, sugar:3, fiber:5},
+      base:2,
+      ingredients:[
+        {emoji:'🥦', name:'Brocolis', qty:500, unit:'g'},
+        {emoji:'🧀', name:'Emmental râpé', qty:60, unit:'g'},
+        {emoji:'🧄', name:'Ail', qty:2, unit:'gousses'},
+        {emoji:'🫒', name:"Huile d'olive", qty:1, unit:'c.à.s'},
+        {emoji:'🍋', name:'Jus de citron', qty:1, unit:'c.à.s'},
+        {emoji:'🧂', name:'Sel, poivre, muscade', qty:1, unit:'pincée'},
+      ],
+      steps:[
+        {title:'Blanchir les brocolis', text:'Découpez en fleurettes. Blanchissez 4 minutes dans l\'eau bouillante salée, égouttez.', time:'8 min'},
+        {title:'Assaisonner', text:'Dans un plat huilé, disposez les brocolis avec ail émincé, huile, citron, sel et muscade.', time:'3 min'},
+        {title:'Gratiner', text:'Couvrez d\'emmental râpé. Enfournez à 180°C pendant 15 min jusqu\'à dorure.', time:'15 min'},
+        {title:'Servir', text:'Servez chaud en accompagnement d\'une protéine.', time:'1 min'},
+      ],
+      tips:['Ne surcuisez pas les brocolis au départ — ils continuent de cuire au four', 'Version sans fromage : huile + ail + citron + amandes effilées grillées', 'Les tiges sont aussi bonnes que les fleurettes — épluchez-les']
+    },
+    "Lentilles": {
+      emoji:'🫘', desc:'Une soupe de lentilles corail chaude et réconfortante, riche en protéines végétales et en fer pour booster votre endurance.',
+      tags:['⏱ 30 min','NOVA 1','Protéines végétales'], color:'green',
+      nutri:{kcal:220, protein:14, sugar:4, fiber:8},
+      base:4,
+      ingredients:[
+        {emoji:'🫘', name:'Lentilles corail', qty:250, unit:'g'},
+        {emoji:'🍅', name:'Tomates concassées', qty:400, unit:'g'},
+        {emoji:'🧅', name:'Oignon', qty:1, unit:''},
+        {emoji:'🧄', name:'Ail', qty:3, unit:'gousses'},
+        {emoji:'🫚', name:"Huile d'olive", qty:2, unit:'c.à.s'},
+        {emoji:'🌿', name:'Cumin + Curcuma', qty:1, unit:'c.à.c chacun'},
+        {emoji:'🍋', name:'Jus de citron', qty:1, unit:'c.à.s'},
+      ],
+      steps:[
+        {title:'Faire revenir', text:'Faites revenir oignon et ail émincés 5 min dans l\'huile à feu moyen.', time:'5 min'},
+        {title:'Torréfier les épices', text:'Ajoutez cumin et curcuma, remuez 1 min pour libérer les arômes.', time:'1 min'},
+        {title:'Cuire les lentilles', text:'Ajoutez lentilles rincées, tomates et 600ml d\'eau. Portez à ébullition puis laissez mijoter.', time:'20 min'},
+        {title:'Finir et servir', text:'Ajoutez jus de citron, sel et poivre. Mixez partiellement si vous voulez.', time:'2 min'},
+      ],
+      tips:['Les lentilles corail n\'ont pas besoin de trempage — 20 min suffisent', 'Lait de coco à la place de l\'eau = version crémeuse et douce', 'Se congèle très bien — doublez les quantités']
+    },
+    "Poulet grillé": {
+      emoji:'🍗', desc:'Un poulet grillé juteux mariné aux herbes et citron — la référence pour la prise de muscle avec un maximum de protéines maigres.',
+      tags:['⏱ 25 min + marinade','NOVA 1','Riche en protéines'], color:'green',
+      nutri:{kcal:240, protein:35, sugar:1, fiber:0},
+      base:2,
+      ingredients:[
+        {emoji:'🍗', name:'Blancs de poulet', qty:400, unit:'g'},
+        {emoji:'🍋', name:'Citron', qty:1, unit:''},
+        {emoji:'🧄', name:'Ail', qty:3, unit:'gousses'},
+        {emoji:'🫒', name:"Huile d'olive", qty:3, unit:'c.à.s'},
+        {emoji:'🌶', name:'Paprika fumé + origan', qty:1, unit:'c.à.c chacun'},
+        {emoji:'🧂', name:'Sel & poivre', qty:1, unit:'pincée'},
+      ],
+      steps:[
+        {title:'Marinade', text:'Mélangez jus de citron, huile, ail émincé, paprika, origan, sel et poivre.', time:'3 min'},
+        {title:'Mariner', text:'Aplatissez les blancs légèrement. Laissez-les dans la marinade 30 min (ou 10 min minimum).', time:'30 min'},
+        {title:'Griller', text:'Poêle très chaude, pas de matière grasse. Cuisez 5-6 min de chaque côté sans bouger.', time:'12 min'},
+        {title:'Laisser reposer', text:'Retirez du feu, attendez 3 minutes avant de couper — les jus se redistribuent.', time:'3 min'},
+      ],
+      tips:['Le repos est obligatoire — sinon la viande perd tous ses jus', 'Jus clair = bien cuit · Jus rosé = pas encore', 'Préparez 4 blancs d\'un coup et conservez pour la semaine']
+    },
+    "Œufs entiers": {
+      emoji:'🥚', desc:'Une omelette garnie haute en protéines — acides aminés essentiels complets pour la construction musculaire.',
+      tags:['⏱ 10 min','NOVA 1','Protéines complètes'], color:'green',
+      nutri:{kcal:280, protein:20, sugar:2, fiber:2},
+      base:2,
+      ingredients:[
+        {emoji:'🥚', name:'Œufs', qty:4, unit:''},
+        {emoji:'🧀', name:'Fromage râpé', qty:40, unit:'g'},
+        {emoji:'🍃', name:'Épinards frais', qty:80, unit:'g'},
+        {emoji:'🍅', name:'Tomates cerises', qty:100, unit:'g'},
+        {emoji:'🧈', name:'Beurre', qty:10, unit:'g'},
+        {emoji:'🧂', name:'Sel & poivre', qty:1, unit:'pincée'},
+      ],
+      steps:[
+        {title:'Sauter les légumes', text:'Faites revenir épinards et tomates dans le beurre 2-3 min.', time:'3 min'},
+        {title:'Battre et verser', text:'Battez les œufs avec sel et poivre. Versez sur les légumes à feu moyen.', time:'1 min'},
+        {title:'Ajouter le fromage', text:'Quand les bords prennent, ajoutez le fromage sur une moitié. Pliez quand le dessus est encore légèrement baveux.', time:'4 min'},
+        {title:'Servir', text:'Glissez dans une assiette. Servez immédiatement.', time:'1 min'},
+      ],
+      tips:['Baveux à l\'intérieur = parfait', 'Variez : feta + tomates, jambon + champignons, chèvre + noix', 'Ajoutez fromage blanc dans les œufs battus pour plus de légèreté']
+    },
+    "Thon": {
+      emoji:'🐟', desc:'Un bowl de thon avocat frais et nourrissant — protéines + oméga-3 en un repas prêt en 10 minutes.',
+      tags:['⏱ 10 min','NOVA 1','Sans cuisson'], color:'green',
+      nutri:{kcal:380, protein:30, sugar:2, fiber:5},
+      base:2,
+      ingredients:[
+        {emoji:'🐟', name:'Thon en boîte (eau)', qty:2, unit:'boîtes'},
+        {emoji:'🥑', name:'Avocat', qty:1, unit:''},
+        {emoji:'🍅', name:'Tomates cerises', qty:150, unit:'g'},
+        {emoji:'🥒', name:'Concombre', qty:0.5, unit:''},
+        {emoji:'🍋', name:'Jus de citron', qty:2, unit:'c.à.s'},
+        {emoji:'🍚', name:'Riz ou quinoa cuit', qty:200, unit:'g'},
+      ],
+      steps:[
+        {title:'Préparer', text:'Coupez avocat en cubes, tomates en 2, concombre en rondelles.', time:'4 min'},
+        {title:'Assaisonner le thon', text:'Égouttez et émiettez le thon. Ajoutez citron, huile, sel et poivre.', time:'2 min'},
+        {title:'Assembler le bowl', text:'Riz dans le bol, puis thon, avocat, tomates et concombre par sections.', time:'3 min'},
+        {title:'Finir', text:'Herbes fraîches, filet d\'huile, quartier de citron. Servez immédiatement.', time:'1 min'},
+      ],
+      tips:['Thon à l\'eau = moins de graisses que thon à l\'huile', 'Préparez le riz ou quinoa à l\'avance', 'Ajoutez edamame ou graines de sésame pour plus de protéines']
+    },
+    "Fromage blanc 0%": {
+      emoji:'🥛', desc:'Un bowl de fromage blanc aux fruits rouges — caséine lente idéale le soir pour alimenter les muscles pendant la nuit.',
+      tags:['⏱ 5 min','NOVA 1','Protéines lentes'], color:'green',
+      nutri:{kcal:200, protein:18, sugar:12, fiber:2},
+      base:2,
+      ingredients:[
+        {emoji:'🥛', name:'Fromage blanc 0%', qty:400, unit:'g'},
+        {emoji:'🫐', name:'Myrtilles', qty:100, unit:'g'},
+        {emoji:'🍓', name:'Framboises', qty:100, unit:'g'},
+        {emoji:'🌾', name:'Granola nature', qty:40, unit:'g'},
+        {emoji:'🍯', name:'Miel', qty:2, unit:'c.à.c'},
+        {emoji:'🌿', name:'Menthe fraîche', qty:4, unit:'feuilles'},
+      ],
+      steps:[
+        {title:'Rincer les fruits', text:'Rincez myrtilles et framboises. Gardez quelques fruits pour décorer.', time:'2 min'},
+        {title:'Assembler', text:'Versez le fromage blanc dans deux bols. Ajoutez les fruits par-dessus.', time:'1 min'},
+        {title:'Topping', text:'Parsemez de granola juste avant de servir pour garder le croquant. Filet de miel.', time:'1 min'},
+        {title:'Décorer', text:'Feuilles de menthe fraîche et fruits réservés.', time:'1 min'},
+      ],
+      tips:['Granola au dernier moment pour éviter qu\'il ramollisse', 'Le skyr est encore plus riche en protéines', 'Variez les fruits : fraises, pêche, kiwi, grenade selon la saison']
+    },
+    "Pois chiches": {
+      emoji:'🫘', desc:'Des pois chiches rôtis croustillants — snack protéiné ou base de bowl, riches en protéines végétales.',
+      tags:['⏱ 35 min','NOVA 1','Protéines végétales'], color:'green',
+      nutri:{kcal:280, protein:14, sugar:3, fiber:9},
+      base:2,
+      ingredients:[
+        {emoji:'🫘', name:'Pois chiches (boîte)', qty:400, unit:'g'},
+        {emoji:'🫒', name:"Huile d'olive", qty:2, unit:'c.à.s'},
+        {emoji:'🌶', name:'Paprika fumé', qty:1, unit:'c.à.c'},
+        {emoji:'🧄', name:'Ail en poudre', qty:0.5, unit:'c.à.c'},
+        {emoji:'🟡', name:'Curcuma', qty:0.5, unit:'c.à.c'},
+        {emoji:'🧂', name:'Sel & poivre', qty:1, unit:'pincée'},
+      ],
+      steps:[
+        {title:'Sécher les pois chiches', text:'Égouttez, rincez, puis séchez très bien avec du papier absorbant. C\'est la clé du croustillant.', time:'5 min'},
+        {title:'Assaisonner', text:'Mélangez avec huile, paprika, ail en poudre, curcuma, sel et poivre.', time:'2 min'},
+        {title:'Rôtir', text:'Étalez en une seule couche sur une plaque. Four à 200°C pendant 25-30 min, remuez à mi-cuisson.', time:'30 min'},
+        {title:'Servir', text:'Chauds sur une salade, dans un bowl, ou comme snack.', time:'1 min'},
+      ],
+      tips:['Plus ils sont secs avant cuisson, plus ils seront croustillants', 'Ils ramollissent en refroidissant — réchauffez 5 min au four', 'Version houmous : mixez avec tahini + citron + ail + huile']
+    },
+    "Bœuf maigre": {
+      emoji:'🥩', desc:'Un steak grillé parfait — protéines complètes et fer biodisponible pour la construction et la récupération musculaire.',
+      tags:['⏱ 15 min','NOVA 1','Riche en fer'], color:'green',
+      nutri:{kcal:250, protein:30, sugar:0, fiber:0},
+      base:2,
+      ingredients:[
+        {emoji:'🥩', name:'Steak (rumsteck)', qty:300, unit:'g'},
+        {emoji:'🧈', name:'Beurre', qty:20, unit:'g'},
+        {emoji:'🧄', name:'Ail', qty:2, unit:'gousses'},
+        {emoji:'🌿', name:'Thym ou romarin', qty:2, unit:'branches'},
+        {emoji:'🧂', name:'Sel & poivre', qty:1, unit:'pincée'},
+      ],
+      steps:[
+        {title:'Sortir la viande', text:'20 min avant cuisson, sortez le steak du frigo. Séchez avec du papier absorbant.', time:'20 min'},
+        {title:'Saisir à feu très vif', text:'Poêle en fonte très chaude, sans matière grasse. Posez le steak, ne bougez pas pendant 2-3 min.', time:'3 min'},
+        {title:'Retourner et aromatiser', text:'Retournez. Ajoutez beurre, ail écrasé et thym. Arrosez la viande de beurre fondu 2 min.', time:'3 min'},
+        {title:'Reposer obligatoire', text:'Retirez du feu. Reposez 5 min sur une planche sous papier alu. Salez et poivrez après.', time:'5 min'},
+      ],
+      tips:['Saignant 2 min/côté · À point 3 min · Bien cuit 4 min', 'Salez toujours APRÈS cuisson — jamais avant', 'Le repos est aussi important que la cuisson — ne sautez pas cette étape']
+    },
+    "Salade verte": {
+      emoji:'🥗', desc:'Une grande salade composée croquante et rassasiante. Très peu de calories, beaucoup de volume et de fibres — parfaite pour gérer son poids.',
+      tags:['⏱ 15 min','NOVA 1','Sans cuisson'], color:'green',
+      nutri:{kcal:180, protein:12, sugar:4, fiber:6},
+      base:2,
+      ingredients:[
+        {emoji:'🥗', name:'Mesclun ou roquette', qty:150, unit:'g'},
+        {emoji:'🍅', name:'Tomates cerises', qty:200, unit:'g'},
+        {emoji:'🥒', name:'Concombre', qty:1, unit:''},
+        {emoji:'🥕', name:'Carotte râpée', qty:1, unit:''},
+        {emoji:'🥚', name:'Œufs durs', qty:2, unit:''},
+        {emoji:'🐟', name:'Thon en boîte', qty:1, unit:'boîte'},
+        {emoji:'🍋', name:'Citron + huile d\'olive', qty:2, unit:'c.à.s chacun'},
+      ],
+      steps:[
+        {title:'Cuire les œufs', text:'Œufs dans eau bouillante 9 min. Refroidissez sous eau froide, écalez, coupez en quartiers.', time:'12 min'},
+        {title:'Préparer les légumes', text:'Coupez tomates en 2, tranchez concombre, râpez carotte, égouttez le thon.', time:'5 min'},
+        {title:'Vinaigrette', text:'Mélangez jus de citron, huile d\'olive, pointe de moutarde, sel et poivre. Fouettez.', time:'2 min'},
+        {title:'Assembler', text:'Salade dans le saladier, légumes par-dessus, thon et œufs. Versez la vinaigrette juste avant.', time:'2 min'},
+      ],
+      tips:['Vinaigrette au citron = plus légère que celle au vinaigre', 'Assemblez au dernier moment pour éviter que ça ramollisse', 'Ajoutez graines de courge pour le croquant et les bons lipides']
+    },
+    "Légumes vapeur": {
+      emoji:'🥦', desc:'Un panier de légumes vapeur — la cuisson qui préserve le mieux les vitamines avec un minimum de calories.',
+      tags:['⏱ 20 min','NOVA 1','Très faible calories'], color:'green',
+      nutri:{kcal:120, protein:6, sugar:5, fiber:7},
+      base:2,
+      ingredients:[
+        {emoji:'🥦', name:'Brocolis', qty:200, unit:'g'},
+        {emoji:'🥕', name:'Carottes', qty:200, unit:'g'},
+        {emoji:'🫛', name:'Courgettes', qty:200, unit:'g'},
+        {emoji:'🫒', name:"Huile d'olive", qty:1, unit:'c.à.s'},
+        {emoji:'🍋', name:'Jus de citron', qty:1, unit:'c.à.s'},
+        {emoji:'🌿', name:'Herbes de Provence + ail', qty:1, unit:'c.à.c'},
+      ],
+      steps:[
+        {title:'Préparer', text:'Carottes en bâtonnets, brocolis en fleurettes, courgettes en rondelles épaisses.', time:'5 min'},
+        {title:'Cuire à la vapeur', text:'Panier vapeur au-dessus d\'eau bouillante. Carottes 12 min, brocolis 8 min, courgettes 6 min.', time:'12 min'},
+        {title:'Vinaigrette légère', text:'Mélangez huile, citron, herbes, ail en poudre, sel et poivre.', time:'2 min'},
+        {title:'Servir', text:'Arrosez de vinaigrette. Servez chaud ou laissez refroidir en salade tiède.', time:'1 min'},
+      ],
+      tips:['Commencez par les légumes les plus durs (carottes)', 'Sans panier vapeur : 3cm d\'eau dans casserole couverte', 'La vapeur préserve 60% de vitamines de plus que la cuisson à l\'eau']
+    },
+    "Pomme": {
+      emoji:'🍎', desc:'Une compote de pommes maison sans sucre ajouté — riche en pectine qui réduit l\'absorption des graisses et coupe la faim naturellement.',
+      tags:['⏱ 20 min','NOVA 1','Coupe-faim naturel'], color:'green',
+      nutri:{kcal:80, protein:0.3, sugar:10, fiber:3},
+      base:4,
+      ingredients:[
+        {emoji:'🍎', name:'Pommes', qty:6, unit:''},
+        {emoji:'🍋', name:'Jus de citron', qty:1, unit:'c.à.s'},
+        {emoji:'🍂', name:'Cannelle', qty:1, unit:'c.à.c'},
+        {emoji:'💧', name:'Eau', qty:3, unit:'c.à.s'},
+        {emoji:'🍯', name:'Miel (optionnel)', qty:1, unit:'c.à.c'},
+      ],
+      steps:[
+        {title:'Préparer les pommes', text:'Épluchez, retirez les cœurs, coupez en gros morceaux. Arrosez de citron.', time:'5 min'},
+        {title:'Cuire', text:'Dans une casserole avec 3 c.à.s d\'eau et la cannelle. Couvrez, feu doux, remuez parfois.', time:'15 min'},
+        {title:'Mixer', text:'Écrasez à la fourchette (rustique) ou mixez (lisse). Goûtez, ajoutez miel si besoin.', time:'2 min'},
+        {title:'Servir', text:'Tiède ou froide, seule ou avec du yaourt ou des flocons d\'avoine.', time:'1 min'},
+      ],
+      tips:['Mélangez Golden (douce) + Granny Smith (acidulée) = équilibre parfait', 'Se conserve 5 jours au frigo ou 3 mois au congélateur', 'Variante : vanille, gingembre, ou épices à pain d\'épices']
+    },
+    "Concombre": {
+      emoji:'🥒', desc:'Un tzatziki frais et léger — 35 calories par portion, hydratant, et parfait comme dip rassasiante.',
+      tags:['⏱ 10 min + repos','NOVA 1','Très faible calories'], color:'green',
+      nutri:{kcal:70, protein:5, sugar:3, fiber:1},
+      base:4,
+      ingredients:[
+        {emoji:'🥒', name:'Concombre', qty:1, unit:'grand'},
+        {emoji:'🥛', name:'Yaourt grec nature', qty:300, unit:'g'},
+        {emoji:'🧄', name:'Ail', qty:1, unit:'gousse'},
+        {emoji:'🍋', name:'Jus de citron', qty:1, unit:'c.à.s'},
+        {emoji:'🌿', name:'Menthe fraîche', qty:10, unit:'feuilles'},
+        {emoji:'🫒', name:"Huile d'olive", qty:1, unit:'c.à.s'},
+      ],
+      steps:[
+        {title:'Égoutter le concombre', text:'Râpez le concombre. Salez et laissez dégorger 10 min. Pressez fort pour enlever le maximum d\'eau.', time:'12 min'},
+        {title:'Mélanger', text:'Yaourt grec + ail émincé + citron + menthe ciselée. Mélangez.', time:'3 min'},
+        {title:'Incorporer', text:'Ajoutez le concombre bien essoré. Assaisonnez sel et poivre.', time:'1 min'},
+        {title:'Reposer et servir', text:'30 min au frigo pour développer les saveurs. Arrosez d\'huile d\'olive.', time:'30 min'},
+      ],
+      tips:['Bien essorer le concombre = la clé pour éviter un tzatziki liquide', 'Encore meilleur le lendemain — préparez la veille', 'Servez avec pain complet, crudités, ou en sauce pour le poulet grillé']
+    },
+    "Œuf à la coque": {
+      emoji:'🥚', desc:'Des œufs à la coque avec mouillettes — 80 kcal par œuf, 6g de protéines. Le petit-déjeuner minceur parfait.',
+      tags:['⏱ 10 min','NOVA 1','Ultra simple'], color:'green',
+      nutri:{kcal:200, protein:14, sugar:1, fiber:3},
+      base:2,
+      ingredients:[
+        {emoji:'🥚', name:'Œufs frais', qty:4, unit:''},
+        {emoji:'🍞', name:'Pain complet', qty:4, unit:'tranches'},
+        {emoji:'🧈', name:'Beurre léger', qty:10, unit:'g'},
+        {emoji:'🧂', name:'Fleur de sel & poivre', qty:1, unit:'pincée'},
+      ],
+      steps:[
+        {title:'Faire bouillir', text:'Portez l\'eau à ébullition complète avant d\'y plonger les œufs.', time:'3 min'},
+        {title:'Cuire exactement', text:'Plongez les œufs délicatement. Cuisez 6 minutes exactement. Plongez 30 sec dans l\'eau froide.', time:'6 min'},
+        {title:'Mouillettes', text:'Toastez le pain. Coupez en bâtonnets de 1 cm. Beurrez légèrement.', time:'3 min'},
+        {title:'Servir', text:'Coupez le chapeau. Fleur de sel. Trempez les mouillettes dans le jaune coulant.', time:'1 min'},
+      ],
+      tips:['6 min = jaune coulant · 7 min = mi-cuit · 9 min = dur', 'Œufs à température ambiante pour une cuisson précise', 'Variante : œufs pochés pour une version sans beurre']
+    },
+    "Myrtilles": {
+      emoji:'🫐', desc:'Un smoothie bowl aux myrtilles concentré d\'antioxydants — aussi beau qu\'un dessert, aussi sain qu\'un fruit.',
+      tags:['⏱ 10 min','NOVA 1','Antioxydants'], color:'green',
+      nutri:{kcal:220, protein:6, sugar:14, fiber:5},
+      base:2,
+      ingredients:[
+        {emoji:'🫐', name:'Myrtilles surgelées', qty:300, unit:'g'},
+        {emoji:'🍌', name:'Banane congelée', qty:1, unit:''},
+        {emoji:'🥛', name:'Lait de coco', qty:100, unit:'ml'},
+        {emoji:'🫐', name:'Myrtilles fraîches (topping)', qty:50, unit:'g'},
+        {emoji:'🌾', name:'Granola', qty:30, unit:'g'},
+        {emoji:'🥥', name:'Noix de coco râpée', qty:10, unit:'g'},
+      ],
+      steps:[
+        {title:'Mixer épais', text:'Mixez myrtilles surgelées + banane congelée + lait de coco. Texture très épaisse comme une crème glacée.', time:'3 min'},
+        {title:'Bols froids', text:'Versez dans des bols refroidis au congélateur 5 min avant.', time:'1 min'},
+        {title:'Toppings', text:'Disposez myrtilles fraîches, granola, noix de coco. Filet de miel.', time:'3 min'},
+        {title:'Servir immédiatement', text:'À consommer tout de suite — ça fond rapidement.', time:'1 min'},
+      ],
+      tips:['Fruits congelés = consistance crémeuse sans glace', 'Consommez immédiatement — ça fond vite !', 'Myrtilles surgelées = 3x moins chères et aussi nutritives que fraîches']
+    },
+    "Avocat": {
+      emoji:'🥑', desc:'Des toasts à l\'avocat crémeux et croquants — riches en graisses saines et en vitamine E, le brunch healthy par excellence.',
+      tags:['⏱ 10 min','NOVA 1','Graisses saines'], color:'green',
+      nutri:{kcal:280, protein:8, sugar:1, fiber:6},
+      base:2,
+      ingredients:[
+        {emoji:'🥑', name:'Avocats mûrs', qty:2, unit:''},
+        {emoji:'🍞', name:'Pain complet ou seigle', qty:4, unit:'tranches'},
+        {emoji:'🍋', name:'Jus de citron', qty:1, unit:'c.à.s'},
+        {emoji:'🧂', name:'Fleur de sel & poivre', qty:1, unit:'pincée'},
+        {emoji:'🌶', name:"Piment d'Espelette", qty:1, unit:'pincée'},
+        {emoji:'🌿', name:'Coriandre ou ciboulette', qty:5, unit:'g'},
+      ],
+      steps:[
+        {title:'Toaster le pain', text:'Toastez les tranches jusqu\'à ce qu\'elles soient bien dorées et croustillantes.', time:'3 min'},
+        {title:'Préparer l\'avocat', text:'Coupez en deux, retirez le noyau. Écrasez la chair à la fourchette avec citron, sel et poivre. Gardez des morceaux.', time:'3 min'},
+        {title:'Assembler', text:'Étalez généreusement l\'avocat sur les toasts. Fleur de sel, piment d\'Espelette.', time:'2 min'},
+        {title:'Finir', text:'Parsemez de coriandre ou ciboulette. Servez immédiatement.', time:'1 min'},
+      ],
+      tips:['Le citron est indispensable pour éviter que l\'avocat noircisse', 'Un avocat mûr cède légèrement sous le pouce', 'Galettes de riz à la place du pain = version sans gluten']
+    },
+    "Carottes crues": {
+      emoji:'🥕', desc:'Un houmous maison onctueux avec bâtonnets de carottes — riche en bêta-carotène et protéines végétales.',
+      tags:['⏱ 10 min','NOVA 1','Antioxydants'], color:'green',
+      nutri:{kcal:180, protein:8, sugar:4, fiber:7},
+      base:4,
+      ingredients:[
+        {emoji:'🥕', name:'Carottes', qty:400, unit:'g'},
+        {emoji:'🫘', name:'Pois chiches en boîte', qty:400, unit:'g'},
+        {emoji:'🌰', name:'Tahini (crème sésame)', qty:3, unit:'c.à.s'},
+        {emoji:'🍋', name:'Jus de citron', qty:3, unit:'c.à.s'},
+        {emoji:'🧄', name:'Ail', qty:1, unit:'gousse'},
+        {emoji:'🫒', name:"Huile d'olive", qty:3, unit:'c.à.s'},
+      ],
+      steps:[
+        {title:'Faire le houmous', text:'Mixez pois chiches + tahini + citron + ail + 2 c.à.s huile + sel + cumin. Mixez 2-3 min jusqu\'à texture très lisse.', time:'5 min'},
+        {title:'Carottes en bâtonnets', text:'Épluchez les carottes. Coupez en bâtonnets de 1cm × 8cm.', time:'5 min'},
+        {title:'Dresser', text:'Houmous dans un bol avec un creux au centre. Huile d\'olive, paprika, puis bâtonnets autour.', time:'2 min'},
+        {title:'Servir', text:'Immédiatement ou conservez au frigo 5 jours.', time:'1 min'},
+      ],
+      tips:['Plus vous mixez longtemps, plus le houmous sera lisse', 'Aquafaba (eau des pois chiches) remplace l\'eau', 'Variante betterave : ajoutez 1 betterave cuite pour un houmous rose']
+    },
+    "Sardines": {
+      emoji:'🐟', desc:'Des sardines grillées avec salsa de tomates — NOVA 1, riches en oméga-3 et calcium, un des aliments les plus nutritifs.',
+      tags:['⏱ 15 min','NOVA 1','Oméga-3 + Calcium'], color:'green',
+      nutri:{kcal:250, protein:22, sugar:2, fiber:1},
+      base:2,
+      ingredients:[
+        {emoji:'🐟', name:'Sardines fraîches', qty:6, unit:''},
+        {emoji:'🍅', name:'Tomates cerises', qty:200, unit:'g'},
+        {emoji:'🧅', name:'Oignon rouge', qty:0.5, unit:''},
+        {emoji:'🌿', name:'Persil frais', qty:15, unit:'g'},
+        {emoji:'🍋', name:'Citron', qty:1, unit:''},
+        {emoji:'🍞', name:'Pain de campagne', qty:4, unit:'tranches'},
+      ],
+      steps:[
+        {title:'Salsa de tomates', text:'Tomates cerises en 4, oignon rouge émincé, persil ciselé. Mélangez avec jus de citron, huile, sel et poivre.', time:'5 min'},
+        {title:'Assaisonner les sardines', text:'Arrosez d\'huile, paprika, sel et poivre.', time:'3 min'},
+        {title:'Griller', text:'Plancha ou poêle grill très chaude. Grillez 3 min de chaque côté jusqu\'à dorure.', time:'7 min'},
+        {title:'Servir', text:'Sardines sur pain toasté, nappées de salsa. Quartier de citron.', time:'2 min'},
+      ],
+      tips:['Sardines en boîte = aussi nutritives et prêtes en 5 min', 'Le citron est essentiel pour équilibrer leur goût', '2 sardines = autant de calcium qu\'un verre de lait']
+    },
+    "Thé vert nature": {
+      emoji:'🍵', desc:'Un thé vert préparé à la perfection — température précise pour libérer le maximum d\'antioxydants sans amertume.',
+      tags:['⏱ 5 min','NOVA 1','0 calorie'], color:'green',
+      nutri:{kcal:0, protein:0, sugar:0, fiber:0},
+      base:2,
+      ingredients:[
+        {emoji:'🍵', name:'Thé vert en vrac', qty:4, unit:'g'},
+        {emoji:'💧', name:'Eau filtrée', qty:400, unit:'ml'},
+        {emoji:'🍋', name:'Citron (optionnel)', qty:0.5, unit:''},
+        {emoji:'🍯', name:'Miel (optionnel)', qty:1, unit:'c.à.c'},
+      ],
+      steps:[
+        {title:'Chauffer l\'eau à 75°C', text:'Faites bouillir puis attendez 3-4 minutes. Jamais d\'eau bouillante — ça brûle le thé et le rend amer.', time:'5 min'},
+        {title:'Infuser 2-3 min exactement', text:'Versez sur les feuilles dans une théière ou tasse avec passoire. Pas plus de 3 min.', time:'3 min'},
+        {title:'Retirer les feuilles', text:'Retirez immédiatement pour stopper l\'extraction. Trop longtemps = amer.', time:'1 min'},
+        {title:'Déguster', text:'Nature pour profiter des antioxydants. Citron ou miel si désiré.', time:'1 min'},
+      ],
+      tips:['70-80°C = température idéale, jamais d\'eau bouillante', '2-3 min max d\'infusion', 'Les mêmes feuilles de qualité peuvent s\'infuser 2-3 fois']
+    },
+  };
+
+  // ── INIT ─────────────────────────────────────────────────────
+  const params   = new URLSearchParams(window.location.search);
+  const foodName = decodeURIComponent(params.get('food') || '');
+  const recipe   = RECIPES[foodName];
+
+  // servings state — all in one place
+  let servings = recipe ? recipe.base : 2;
+  const BASE   = recipe ? recipe.base : 2;
+
+  if (!recipe) {
+    document.getElementById('heroTitle').textContent = 'Recette introuvable';
+    document.getElementById('heroDesc').textContent  = 'Retournez au journal et choisissez un aliment.';
+  } else {
+    buildPage();
+  }
+
+  function buildPage() {
+    document.title = `Freshen — ${foodName}`;
+    document.getElementById('heroEmoji').textContent = recipe.emoji;
+    document.getElementById('heroTitle').textContent = foodName;
+    document.getElementById('heroDesc').textContent  = recipe.desc;
+    document.getElementById('heroTags').innerHTML    = recipe.tags.map(t =>
+      `<span class="tag ${t.includes('NOVA 1') ? 'green' : ''}">${t}</span>`).join('');
+
+    // Nutrition
+    document.getElementById('nutriRow').innerHTML = [
+      {val: recipe.nutri.kcal,    label: 'Kcal / portion'},
+      {val: recipe.nutri.protein+'g', label: 'Protéines'},
+      {val: recipe.nutri.sugar+'g',   label: 'Sucres'},
+      {val: recipe.nutri.fiber+'g',   label: 'Fibres'},
+    ].map(n => `
+      <div class="nutri-box">
+        <div class="nutri-val">${n.val}</div>
+        <div class="nutri-label">${n.label}</div>
+      </div>`).join('');
+
+    // Initial render
+    document.getElementById('srvNum').textContent = servings;
+    renderIngredients();
+    renderSteps();
+    renderTips();
+  }
+
+  // ── SERVINGS ─────────────────────────────────────────────────
+  function renderIngredients() {
+    const ratio = servings / BASE;
+    document.getElementById('ingGrid').innerHTML = recipe.ingredients.map((ing, i) => {
+      let qty = '';
+      if (ing.qty) {
+        const val = Math.round(ing.qty * ratio * 10) / 10;
+        qty = val + (ing.unit ? ' ' + ing.unit : '');
+      } else {
+        qty = ing.unit || '';
+      }
+      return `
+        <div class="ing-item" onclick="this.classList.toggle('done')">
+          <div class="ing-emoji">${ing.emoji}</div>
+          <div class="ing-text">
+            <div class="ing-name">${ing.name}</div>
+            <div class="ing-qty">${qty}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderSteps() {
+    document.getElementById('stepsList').innerHTML = recipe.steps.map((s, i) => `
+      <div class="step-item" onclick="this.classList.toggle('done')">
+        <div class="step-num">${i+1}</div>
+        <div class="step-body">
+          <div class="step-title">${s.title}</div>
+          <div class="step-text">${s.text}</div>
+          ${s.time ? `<div class="step-time">⏱ ${s.time}</div>` : ''}
+        </div>
+      </div>`).join('');
+  }
+
+  function renderTips() {
+    document.getElementById('tipsBox').innerHTML = `
+      <div class="tips-title">💡 Astuces</div>
+      ${recipe.tips.map(t => `<div class="tip-item"><span>•</span><span>${t}</span></div>`).join('')}`;
+  }
+
+  // Buttons — simple and direct
+  document.getElementById('btnPlus').onclick = () => {
+    if (servings >= 10) return;
+    servings++;
+    document.getElementById('srvNum').textContent = servings;
+    renderIngredients();
+  };
+
+  document.getElementById('btnMinus').onclick = () => {
+    if (servings <= 1) return;
+    servings--;
+    document.getElementById('srvNum').textContent = servings;
+    renderIngredients();
+  };
+
+  // ── ADD TO JOURNAL ────────────────────────────────────────────
+  document.getElementById('addBtn').onclick = async () => {
+    const { data:{ session } } = await sb.auth.getSession();
+    if (!session) { window.location.href = 'login.html'; return; }
+    const loggedAt = new Date().toISOString();
+    const { error } = await sb.from('consumption_logs').insert({
+      user_id: session.user.id,
+      product_name: foodName,
+      nutrients: { sugar_g: recipe.nutri.sugar, salt_g: 0.3, fat_g: 5, protein_g: recipe.nutri.protein, energy_kcal: recipe.nutri.kcal },
+      nova_score: 1,
+      quantity_g: 200,
+      source: 'recipe',
+      logged_at: loggedAt,
+      logged_date: loggedAt.slice(0,10),
+    });
+    if (error) { showToast('⚠️ Erreur — réessayez'); return; }
+    showToast('✓ Ajouté au journal !');
+    setTimeout(() => window.location.href = 'journal.html', 1500);
+  };
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>

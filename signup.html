@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Freshen — Inscription</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root { --g:#5a8a1f; --gl:#7ab52a; --gd:#3b6011; --cream:#f9f6ef; --dark:#1a1f0e; --border:rgba(0,0,0,0.07); }
+    body { font-family:'DM Sans',sans-serif; background:var(--cream); color:var(--dark); min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem 1.5rem; }
+    .logo { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--g); font-weight:700; margin-bottom:2rem; display:flex; align-items:center; gap:8px; text-decoration:none; }
+    .logo-dot { width:10px; height:10px; background:var(--gl); border-radius:50%; }
+    .auth-box { background:#fff; border-radius:24px; padding:2.5rem; max-width:440px; width:100%; border:0.5px solid var(--border); box-shadow:0 8px 40px rgba(0,0,0,0.04); }
+    .auth-title { font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:700; margin-bottom:0.5rem; }
+    .auth-sub { font-size:0.9rem; opacity:0.6; margin-bottom:2rem; line-height:1.5; }
+    .field { margin-bottom:1.2rem; }
+    .field label { display:block; font-size:0.82rem; font-weight:500; margin-bottom:0.4rem; color:var(--dark); }
+    .field input { width:100%; padding:0.85rem 1rem; border:1.5px solid var(--border); border-radius:12px; font-family:'DM Sans',sans-serif; font-size:0.95rem; background:var(--cream); color:var(--dark); outline:none; transition:border-color 0.2s; }
+    .field input:focus { border-color:var(--g); }
+    .btn-primary { width:100%; background:var(--g); color:#fff; border:none; padding:0.95rem; border-radius:100px; font-family:'DM Sans',sans-serif; font-size:0.95rem; font-weight:500; cursor:pointer; transition:background 0.2s, transform 0.15s; margin-top:0.5rem; }
+    .btn-primary:hover:not(:disabled) { background:var(--gd); transform:translateY(-1px); }
+    .btn-primary:disabled { opacity:0.6; cursor:not-allowed; }
+    .auth-msg { margin-top:1rem; font-size:0.85rem; min-height:1.2em; text-align:center; line-height:1.5; }
+    .auth-msg.error { color:#c62828; }
+    .auth-msg.success { color:var(--g); }
+    .auth-foot { text-align:center; margin-top:1.5rem; font-size:0.85rem; opacity:0.65; }
+    .auth-foot a { color:var(--g); text-decoration:none; font-weight:500; }
+    .auth-foot a:hover { text-decoration:underline; }
+    .quiz-preview { background:rgba(90,138,31,0.06); border-radius:12px; padding:0.8rem 1rem; margin-bottom:1.5rem; font-size:0.82rem; line-height:1.5; color:var(--g); }
+    .quiz-preview strong { display:block; margin-bottom:0.2rem; font-weight:500; }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="logo"><span class="logo-dot"></span>Freshen</a>
+
+  <div class="auth-box">
+    <div class="auth-title">Créer votre compte</div>
+    <div class="auth-sub">Commencez votre voyage vers une meilleure alimentation, gratuitement.</div>
+
+    <div class="quiz-preview" id="quizPreview" style="display:none;">
+      <strong>✓ Vos réponses au quiz seront sauvegardées</strong>
+      <span id="quizSummary"></span>
+    </div>
+
+    <form id="signupForm">
+      <div class="field">
+        <label for="name">Prénom</label>
+        <input type="text" id="name" autocomplete="given-name" required />
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" autocomplete="email" required />
+      </div>
+      <div class="field">
+        <label for="password">Mot de passe (min. 6 caractères)</label>
+        <input type="password" id="password" autocomplete="new-password" minlength="6" required />
+      </div>
+      <button type="submit" class="btn-primary" id="submitBtn">Créer mon compte →</button>
+      <div class="auth-msg" id="msg"></div>
+    </form>
+
+    <div class="auth-foot">
+      Vous avez déjà un compte ? <a href="login.html">Se connecter</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
+
+    /* ⚠️ REMPLACEZ avec vos vraies clés Supabase
+       URL  : Dashboard → Settings → API → "Project URL"  (https://xxxxx.supabase.co)
+       ANON : Dashboard → Settings → API → "anon public"  (longue chaîne eyJ...) */
+    const SUPABASE_URL      = 'https://nuzlradcatdudvkcacpp.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51emxyYWRjYXRkdWR2a2NhY3BwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4OTc2MjYsImV4cCI6MjA5MzQ3MzYyNn0.CeLsQh_ZENqMM5v84jU2_iz02PDIMHKLvrJ-VPegARk';
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) window.location.href = 'dashboard.html';
+
+    const GOAL_MAP = {
+      'Augmenter mon énergie': 'energy',
+      'Développer mes muscles': 'gain_muscle',
+      'Gérer mon poids': 'lose_weight',
+      'Manger consciemment': 'health',
+    };
+    const DIET_MAP = {
+      'Aucune restriction': 'omnivore',
+      'Végétarien': 'vegetarian',
+      'Végan': 'vegan',
+      'Sans gluten': 'gluten_free',
+    };
+    const COOK_MAP = {
+      'Moins de 15 min': '15min',
+      '15–30 min': '30min',
+      '30–60 min': '60min',
+      "J'adore cuisiner!": 'no_limit',
+    };
+
+    const quiz = JSON.parse(localStorage.getItem('freshen_quiz') || 'null');
+    if (quiz) {
+      document.getElementById('quizPreview').style.display = 'block';
+      const parts = [];
+      if (quiz.goal) parts.push(`Objectif : ${quiz.goal}`);
+      if (quiz.diet) parts.push(`Régime : ${quiz.diet}`);
+      if (quiz.cookTime) parts.push(`Cuisine : ${quiz.cookTime}`);
+      document.getElementById('quizSummary').textContent = parts.join(' · ');
+    }
+
+    const form = document.getElementById('signupForm');
+    const msg  = document.getElementById('msg');
+    const btn  = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.className = 'auth-msg';
+      msg.textContent = '';
+      btn.disabled = true;
+      btn.textContent = 'Création en cours…';
+
+      const name     = document.getElementById('name').value.trim();
+      const email    = document.getElementById('email').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+
+      const { data, error } = await sb.auth.signUp({
+        email, password, options: { data: { name } }
+      });
+
+      if (error) {
+        msg.className = 'auth-msg error';
+        msg.textContent = error.message.includes('already registered')
+          ? 'Cet email est déjà utilisé. Essayez de vous connecter.'
+          : `Erreur : ${error.message}`;
+        btn.disabled = false;
+        btn.textContent = 'Créer mon compte →';
+        return;
+      }
+
+      if (!data.session) {
+        msg.className = 'auth-msg success';
+        msg.innerHTML = `✅ Compte créé ! Vérifiez votre boîte mail (<strong>${email}</strong>)<br>pour confirmer votre adresse, puis connectez-vous.`;
+        btn.textContent = 'Compte créé';
+        return;
+      }
+
+      const profileUpdate = { name };
+      if (quiz) {
+        if (quiz.goal && GOAL_MAP[quiz.goal]) profileUpdate.goal = GOAL_MAP[quiz.goal];
+        if (quiz.diet && DIET_MAP[quiz.diet]) profileUpdate.diet = DIET_MAP[quiz.diet];
+        if (quiz.cookTime && COOK_MAP[quiz.cookTime]) profileUpdate.cook_time = COOK_MAP[quiz.cookTime];
+      }
+      await sb.from('profiles').update(profileUpdate).eq('id', data.user.id);
+
+      await sb.from('consent_log').insert([
+        { user_id: data.user.id, kind: 'terms',   action: 'granted', version: 'tos-2026-05' },
+        { user_id: data.user.id, kind: 'privacy', action: 'granted', version: 'privacy-2026-05' },
+      ]);
+
+      localStorage.removeItem('freshen_quiz');
+      window.location.href = 'journal.html';
+    });
+  </script>
+</body>
+</html>

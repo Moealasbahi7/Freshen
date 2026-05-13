@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Freshen — Mon tableau de bord</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --g:#5a8a1f; --gl:#7ab52a; --gd:#3b6011;
+      --cream:#f9f6ef; --dark:#1a1f0e; --border:rgba(0,0,0,0.07);
+      --warn:#e07b00; --bad:#c62828;
+    }
+    body { font-family:'DM Sans',sans-serif; background:var(--cream); color:var(--dark); min-height:100vh; }
+    nav { display:flex; align-items:center; justify-content:space-between; padding:1.2rem 3rem; background:rgba(249,246,239,0.96); position:sticky; top:0; z-index:200; backdrop-filter:blur(8px); border-bottom:0.5px solid rgba(90,138,31,0.15); }
+    .logo { font-family:'Playfair Display',serif; font-size:1.6rem; color:var(--g); font-weight:700; display:flex; align-items:center; gap:8px; text-decoration:none; }
+    .logo-dot { width:10px; height:10px; background:var(--gl); border-radius:50%; }
+    .nav-links { display:flex; gap:2rem; }
+    .nav-links a { text-decoration:none; color:var(--dark); font-size:0.92rem; opacity:0.65; transition:opacity 0.2s; }
+    .nav-links a:hover, .nav-links a.active { opacity:1; color:var(--g); }
+    .nav-right { display:flex; align-items:center; gap:1.2rem; }
+    .nav-user { font-size:0.88rem; opacity:0.7; }
+    .btn-logout { background:transparent; border:1.5px solid var(--border); color:var(--dark); padding:0.5rem 1.2rem; border-radius:100px; font-family:'DM Sans',sans-serif; font-size:0.85rem; cursor:pointer; transition:all 0.2s; }
+    .btn-logout:hover { border-color:var(--g); color:var(--g); }
+
+    .container { max-width:1100px; margin:0 auto; padding:3rem 2rem; }
+    .greeting { font-family:'Playfair Display',serif; font-size:2.4rem; font-weight:700; margin-bottom:0.5rem; }
+    .greeting-sub { font-size:1rem; opacity:0.6; margin-bottom:2.5rem; }
+
+    /* Score block */
+    .score-row { display:grid; grid-template-columns:auto 1fr; gap:2rem; align-items:center; background:#fff; border-radius:20px; padding:2rem; border:0.5px solid var(--border); margin-bottom:2rem; }
+    .score-circle { width:120px; height:120px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#fff; flex-shrink:0; }
+    .score-circle.A { background:linear-gradient(135deg,#5a8a1f,#7ab52a); }
+    .score-circle.B { background:linear-gradient(135deg,#7ab52a,#a4c93f); }
+    .score-circle.C { background:linear-gradient(135deg,#e07b00,#f5a623); }
+    .score-circle.D { background:linear-gradient(135deg,#c62828,#e74c3c); }
+    .score-grade { font-family:'Playfair Display',serif; font-size:2.6rem; font-weight:700; line-height:1; }
+    .score-num { font-size:0.78rem; opacity:0.92; margin-top:2px; }
+    .score-info h3 { font-family:'Playfair Display',serif; font-size:1.3rem; margin-bottom:0.3rem; }
+    .score-info p { font-size:0.92rem; opacity:0.65; line-height:1.6; }
+
+    .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem; margin-bottom:2rem; }
+    .card { background:#fff; border-radius:20px; padding:1.6rem; border:0.5px solid var(--border); }
+    .card-label { font-size:0.72rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--g); font-weight:500; margin-bottom:0.6rem; }
+    .card-value { font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; margin-bottom:0.3rem; }
+    .card-desc { font-size:0.82rem; opacity:0.6; line-height:1.5; }
+
+    .quick { display:grid; grid-template-columns:repeat(2,1fr); gap:1.2rem; }
+    .quick-card { background:#fff; border-radius:20px; padding:1.8rem; border:0.5px solid var(--border); text-align:center; transition:transform 0.2s, box-shadow 0.2s, border-color 0.2s; text-decoration:none; color:inherit; display:block; }
+    .quick-card.active:hover { transform:translateY(-4px); box-shadow:0 12px 32px rgba(0,0,0,0.06); border-color:rgba(90,138,31,0.4); cursor:pointer; }
+    .quick-card.locked { opacity:0.65; }
+    .quick-icon { font-size:2.4rem; margin-bottom:0.8rem; }
+    .quick-title { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; margin-bottom:0.4rem; }
+    .quick-desc { font-size:0.88rem; opacity:0.65; line-height:1.5; margin-bottom:0.9rem; }
+    .quick-tag { display:inline-block; font-size:0.7rem; padding:0.3rem 0.8rem; border-radius:100px; font-weight:500; }
+    .quick-tag.go   { background:rgba(90,138,31,0.12); color:var(--g); }
+    .quick-tag.soon { background:rgba(0,0,0,0.06); color:#888; }
+
+    .loading { text-align:center; padding:5rem 2rem; opacity:0.5; }
+
+    @media (max-width:768px) {
+      nav { padding:1rem 1.5rem; flex-wrap:wrap; gap:0.6rem; }
+      .nav-links { width:100%; order:3; gap:1.2rem; }
+      .container { padding:2rem 1.2rem; }
+      .greeting { font-size:1.8rem; }
+      .score-row { grid-template-columns:1fr; text-align:center; }
+      .score-circle { margin:0 auto; }
+      .grid3, .quick { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="logo"><span class="logo-dot"></span>Freshen</a>
+    <div class="nav-links">
+      <a href="dashboard.html" class="active">Tableau de bord</a>
+      <a href="journal.html">Journal</a>
+    </div>
+    <div class="nav-right">
+      <span class="nav-user" id="navUser">…</span>
+      <button class="btn-logout" id="logoutBtn">Se déconnecter</button>
+    </div>
+  </nav>
+
+  <div class="container" id="content">
+    <div class="loading">Chargement de votre tableau de bord…</div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
+
+    /* ⚠️ REMPLACEZ avec vos vraies clés Supabase */
+    const SUPABASE_URL      = 'https://nuzlradcatdudvkcacpp.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51emxyYWRjYXRkdWR2a2NhY3BwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4OTc2MjYsImV4cCI6MjA5MzQ3MzYyNn0.CeLsQh_ZENqMM5v84jU2_iz02PDIMHKLvrJ-VPegARk';
+
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Lookup tables — MUST be declared before renderDashboard is called
+    const GOAL_LABEL = {
+      energy:"Plus d'énergie", gain_muscle:'Prise de muscle',
+      lose_weight:'Perte de poids', health:'Manger consciemment',
+      maintain:'Maintien'
+    };
+    const DIET_LABEL = {
+      omnivore:'Omnivore', vegetarian:'Végétarien', vegan:'Végan',
+      pescatarian:'Pescétarien', gluten_free:'Sans gluten', lactose_free:'Sans lactose'
+    };
+    const PLAN_LABEL = { free:'Gratuit', premium:'Premium', family:'Famille' };
+
+    // Auth guard
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { window.location.href = 'login.html'; throw new Error('Not authenticated'); }
+    const userId = session.user.id;
+    const today = new Date().toISOString().slice(0,10);
+
+    // Load profile + today's score in parallel
+    const [profileRes, scoreRes, totalsRes] = await Promise.all([
+      sb.from('profiles').select('*').eq('id', userId).single(),
+      sb.rpc('nutriload_score', { p_user_id: userId, p_date: today }),
+      sb.rpc('daily_totals',    { p_user_id: userId, p_date: today }),
+    ]);
+
+    if (profileRes.error) {
+      document.getElementById('content').innerHTML =
+        `<div class="loading">Erreur de chargement du profil.<br><small>${profileRes.error.message}</small></div>`;
+      console.error(profileRes.error);
+    } else {
+      renderDashboard(profileRes.data, scoreRes.data?.[0], totalsRes.data?.[0]);
+    }
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await sb.auth.signOut();
+      window.location.href = 'index.html';
+    });
+
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function renderDashboard(p, score, totals) {
+      document.getElementById('navUser').textContent = p.name || session.user.email;
+
+      const goalLabel = GOAL_LABEL[p.goal] || 'À définir';
+      const dietLabel = DIET_LABEL[p.diet] || 'Omnivore';
+      const planLabel = PLAN_LABEL[p.plan] || 'Gratuit';
+
+      // Score defaults if no logs today
+      const s = score || { score:100, grade:'A', sugar_g:0, salt_g:0, nova4_count:0, sugar_limit:50, salt_limit:5 };
+      const t = totals || { items_count:0, energy_kcal:0 };
+
+      const scoreMessages = {
+        A: "Excellent — vous êtes dans le vert sur tous les indicateurs.",
+        B: "Bonne journée — quelques ajustements possibles.",
+        C: "Attention — vous approchez de vos limites.",
+        D: "Charge élevée — privilégiez NOVA 1–2 sur le reste de la journée."
+      };
+      const scoreMsg = s.items_count === 0 || Number(t.items_count) === 0
+        ? "Pas encore d'aliment loggué aujourd'hui. Ouvrez le journal pour commencer."
+        : scoreMessages[s.grade] || '';
+
+      document.getElementById('content').innerHTML = `
+        <h1 class="greeting">Bonjour, ${escapeHtml(p.name || 'bienvenue')} 👋</h1>
+        <p class="greeting-sub">Voici votre vue d'ensemble du jour.</p>
+
+        <div class="score-row">
+          <div class="score-circle ${s.grade}">
+            <div class="score-grade">${s.grade}</div>
+            <div class="score-num">${s.score} / 100</div>
+          </div>
+          <div class="score-info">
+            <h3>Score NutriLoad du jour</h3>
+            <p>${escapeHtml(scoreMsg)}</p>
+            <p style="margin-top:0.5rem;font-size:0.85rem;opacity:0.55">
+              Sucre : ${Number(s.sugar_g).toFixed(1)}/${s.sugar_limit}g ·
+              Sel : ${Number(s.salt_g).toFixed(2)}/${s.salt_limit}g ·
+              NOVA 4 : ${s.nova4_count} produit(s)
+            </p>
+          </div>
+        </div>
+
+        <div class="grid3">
+          <div class="card">
+            <div class="card-label">Objectif</div>
+            <div class="card-value">${escapeHtml(goalLabel)}</div>
+            <div class="card-desc">Vos plans seront optimisés autour de cet objectif.</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Régime</div>
+            <div class="card-value">${escapeHtml(dietLabel)}</div>
+            <div class="card-desc">Filtre appliqué automatiquement aux recettes.</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Plan</div>
+            <div class="card-value">${escapeHtml(planLabel)}</div>
+            <div class="card-desc">${p.plan === 'free' ? 'Passez Premium pour débloquer le coach IA.' : 'Toutes les fonctionnalités débloquées.'}</div>
+          </div>
+        </div>
+
+        <div class="quick">
+          <a href="journal.html" class="quick-card active">
+            <div class="quick-icon">📓</div>
+            <div class="quick-title">Journal de consommation</div>
+            <div class="quick-desc">Recherchez un produit, suivez votre charge cumulée en sucre, sel et NOVA 4.</div>
+            <div class="quick-tag go">Ouvrir →</div>
+          </a>
+          <div class="quick-card locked">
+            <div class="quick-icon">🤖</div>
+            <div class="quick-title">Coach IA personnalisé</div>
+            <div class="quick-desc">Posez des questions, recevez des recommandations adaptées à votre journée.</div>
+            <div class="quick-tag soon">Phase 6 — Premium</div>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

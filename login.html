@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Freshen — Connexion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root { --g:#5a8a1f; --gl:#7ab52a; --gd:#3b6011; --cream:#f9f6ef; --dark:#1a1f0e; --border:rgba(0,0,0,0.07); }
+    body { font-family:'DM Sans',sans-serif; background:var(--cream); color:var(--dark); min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem 1.5rem; }
+    .logo { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--g); font-weight:700; margin-bottom:2rem; display:flex; align-items:center; gap:8px; text-decoration:none; }
+    .logo-dot { width:10px; height:10px; background:var(--gl); border-radius:50%; }
+    .auth-box { background:#fff; border-radius:24px; padding:2.5rem; max-width:440px; width:100%; border:0.5px solid var(--border); box-shadow:0 8px 40px rgba(0,0,0,0.04); }
+    .auth-title { font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:700; margin-bottom:0.5rem; }
+    .auth-sub { font-size:0.9rem; opacity:0.6; margin-bottom:2rem; }
+    .field { margin-bottom:1.2rem; }
+    .field label { display:block; font-size:0.82rem; font-weight:500; margin-bottom:0.4rem; }
+    .field input { width:100%; padding:0.85rem 1rem; border:1.5px solid var(--border); border-radius:12px; font-family:'DM Sans',sans-serif; font-size:0.95rem; background:var(--cream); color:var(--dark); outline:none; transition:border-color 0.2s; }
+    .field input:focus { border-color:var(--g); }
+    .btn-primary { width:100%; background:var(--g); color:#fff; border:none; padding:0.95rem; border-radius:100px; font-family:'DM Sans',sans-serif; font-size:0.95rem; font-weight:500; cursor:pointer; transition:background 0.2s, transform 0.15s; margin-top:0.5rem; }
+    .btn-primary:hover:not(:disabled) { background:var(--gd); transform:translateY(-1px); }
+    .btn-primary:disabled { opacity:0.6; cursor:not-allowed; }
+    .auth-msg { margin-top:1rem; font-size:0.85rem; min-height:1.2em; text-align:center; }
+    .auth-msg.error { color:#c62828; }
+    .auth-msg.success { color:var(--g); }
+    .auth-foot { text-align:center; margin-top:1.5rem; font-size:0.85rem; opacity:0.65; }
+    .auth-foot a { color:var(--g); text-decoration:none; font-weight:500; }
+    .auth-foot a:hover { text-decoration:underline; }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="logo"><span class="logo-dot"></span>Freshen</a>
+
+  <div class="auth-box">
+    <div class="auth-title">Bon retour parmi nous</div>
+    <div class="auth-sub">Connectez-vous pour reprendre votre plan.</div>
+
+    <form id="loginForm">
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" autocomplete="email" required />
+      </div>
+      <div class="field">
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" autocomplete="current-password" required />
+      </div>
+      <button type="submit" class="btn-primary" id="submitBtn">Se connecter →</button>
+      <div class="auth-msg" id="msg"></div>
+    </form>
+
+    <div class="auth-foot">
+      Pas encore de compte ? <a href="signup.html">Créer un compte</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
+
+    /* ⚠️ REMPLACEZ avec vos vraies clés Supabase
+       URL  : Dashboard → Settings → API → "Project URL"  (https://xxxxx.supabase.co)
+       ANON : Dashboard → Settings → API → "anon public"  (longue chaîne eyJ...) */
+    const SUPABASE_URL      = 'https://nuzlradcatdudvkcacpp.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51emxyYWRjYXRkdWR2a2NhY3BwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4OTc2MjYsImV4cCI6MjA5MzQ3MzYyNn0.CeLsQh_ZENqMM5v84jU2_iz02PDIMHKLvrJ-VPegARk';
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) window.location.href = 'dashboard.html';
+
+    const form = document.getElementById('loginForm');
+    const msg  = document.getElementById('msg');
+    const btn  = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.className = 'auth-msg';
+      msg.textContent = '';
+      btn.disabled = true;
+      btn.textContent = 'Connexion…';
+
+      const email    = document.getElementById('email').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        msg.className = 'auth-msg error';
+        msg.textContent = error.message.includes('Invalid')
+          ? 'Email ou mot de passe incorrect.'
+          : error.message.includes('Email not confirmed')
+          ? 'Vérifiez votre boîte mail pour confirmer votre adresse.'
+          : `Erreur : ${error.message}`;
+        btn.disabled = false;
+        btn.textContent = 'Se connecter →';
+        return;
+      }
+
+      window.location.href = 'dashboard.html';
+    });
+  </script>
+</body>
+</html>
