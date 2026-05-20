@@ -1,4 +1,168 @@
-THIS IS THE CSV FILE AFTER IT BECAME IN PHYTHON SO WE CAN USE IN SUPABASE 
+//////////////THIS IS WHAT WE USED TO CLEAN THE DATABASE////////////
+
+# 1. Collecter les données
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+df = pd.read_csv('/Users/miateixeira/Documents/Ingé 2 2025-2026/Projet final nutrition/en.openfoodfacts.org.products.csv',
+                 sep=';', low_memory=False, on_bad_lines='skip', encoding='utf-8')
+
+# afficher les types de donnees
+print(df.dtypes)
+
+# afficher les valeurs manquantes
+print(df.isnull().sum())
+
+# supprime les valeurs inutile
+df = df.drop([
+    'url', 'creator', 'created_t', 'created_datetime',
+    'last_modified_t', 'last_modified_datetime', 'last_modified_by',
+    'last_updated_t', 'last_updated_datetime',
+    'brands_tags', 'categories_tags', 'categories_en',
+    'origins_tags', 'manufacturing_places_tags',
+    'labels_tags', 'labels_en',
+    'countries', 'countries_tags',
+    'cities_tags', 'purchase_places', 'stores',
+    'emb_codes', 'emb_codes_tags', 'first_packaging_code_geo',
+    'traces_tags', 'traces_en',
+    'additives_old_n', 'additives_old_tags',
+    'states', 'states_tags', 'states_en',
+    'main_category', 'main_category_tags',
+    'pnns_groups_1', 'pnns_groups_2',
+    'image_front_url', 'image_front_small_url', 'image_front_thumb_url',
+    'image_ingredients_url', 'image_ingredients_small_url',
+    'image_nutrition_url', 'image_nutrition_small_url',
+    'glycemic-index_100g', 'water-hardness_100g',
+    'Unnamed: 0',
+], axis=1, errors='ignore')
+
+# supprimer les colonnes #NOM? inutilisables
+df = df.loc[:, ~df.columns.str.startswith('#NOM?')]
+
+# afficher les types de donnees
+print(df.dtypes)
+
+# afficher les valeurs manquantes
+print(df.isnull().sum())
+
+# supprimer les doublons et lignes sans nom
+df = df.drop_duplicates(subset=['code'])
+df = df.dropna(subset=['product_name'])
+df = df[df['product_name'].str.strip() != '']
+
+# corriger les valeurs aberrantes nutritionnelles (impossible d'avoir > 100g pour 100g)
+nutriment_cols = [
+    'fat_100g', 'saturated-fat_100g', 'carbohydrates_100g',
+    'sugars_100g', 'fiber_100g', 'proteins_100g', 'salt_100g', 'sodium_100g'
+]
+
+for col in nutriment_cols:
+    if col in df.columns:
+        df[col] = df[col].where(df[col].between(0, 100))
+
+if 'energy-kcal_100g' in df.columns:
+    df['energy-kcal_100g'] = df['energy-kcal_100g'].where(df['energy-kcal_100g'].between(0, 900))
+
+# remplir les valeurs manquantes numeriques par la mediane
+cols_numeriques = df.select_dtypes(include=['int64', 'float64']).columns
+for col in cols_numeriques:
+    df[col] = df[col].fillna(df[col].median())
+
+# verifier qu'il n'y a plus de valeurs manquantes
+print(df.isnull().sum())
+
+# normaliser nutrition_grade_fr
+if 'nutrition_grade_fr' in df.columns:
+    df['nutrition_grade_fr'] = (
+        df['nutrition_grade_fr']
+        .str.strip().str.upper()
+        .where(df['nutrition_grade_fr'].str.strip().str.upper().isin(['A', 'B', 'C', 'D', 'E']))
+    )
+
+print(df.dtypes)
+print(df.head())
+
+
+
+# 2. Exploration des données
+
+# statistiques descriptives : moyenne, ecart-type, min, max de chaque colonne
+print(df.describe())
+
+# frequence de la variable cible : repartition du Nutri-Score
+freq = df['nutrition_grade_fr'].value_counts()
+freq.plot(kind='bar')
+plt.title("Repartition du Nutri-Score (nutrition_grade_fr)")
+plt.xlabel("Nutri-Score")
+plt.ylabel("Nombre de produits")
+plt.show()
+
+# histogramme : distribution de chaque attribut pour voir leur repartition
+df.hist(figsize=(12, 10))
+plt.show()
+
+# matrice de correlation
+import seaborn as sns
+
+nutri_available = [c for c in nutriment_cols + ['energy-kcal_100g'] if c in df.columns]
+matrice = df[nutri_available].corr()
+sns.heatmap(matrice, annot=True, fmt='.2f', cmap='coolwarm')
+plt.title("Matrice de correlation - Nutriments")
+plt.show()
+
+# importance des features avec Random Forest
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+
+df_rf = df.dropna(subset=['nutrition_grade_fr'])
+df_model = df_rf[nutri_available + ['nutrition_grade_fr']].dropna()
+X = df_model.drop('nutrition_grade_fr', axis=1)
+y = df_model['nutrition_grade_fr']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+rf = RandomForestClassifier(random_state=42)
+rf.fit(X, y)
+
+featimpor = pd.DataFrame(rf.feature_importances_, index=X.columns,
+                         columns=['importance']).sort_values(by='importance', ascending=True)
+
+plt.barh(featimpor.index, featimpor['importance'])
+plt.xlabel('Importance')
+plt.ylabel('Variables')
+plt.title('Importance des variables avec Random Forest')
+plt.show()
+
+# boite a moustaches sur les 3 features les plus importantes identifiees par le Random Forest
+top3 = featimpor.tail(3).index.tolist()
+df[top3].plot.box()
+plt.title("Distribution des 3 nutriments les plus discriminants")
+plt.show()
+
+# supprimer les features inutiles identifiees par la matrice de correlation
+# et le graphique d'importance des features
+low_importance = featimpor[featimpor['importance'] < 0.02].index.tolist()
+df = df.drop(low_importance, axis=1)
+
+# sauvegarder le fichier nettoye
+df.to_csv('/Users/miateixeira/Documents/Ingé 2 2025-2026/Projet final nutrition/nutriload_products.csv', index=False)
+
+print(f"Lignes finales   : {len(df)}")
+print(f"Colonnes finales : {len(df.columns)}")
+
+
+
+
+
+
+//////THIS IS THE CSV FILE AFTER IT BECAME IN PHYTHON SO WE CAN USE IN SUPABASE /////////////
+
+
+
+
+
 
 create table if not exists public.food_products (
   id          uuid primary key default gen_random_uuid(),
